@@ -1,0 +1,556 @@
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">SD</div>
+
+      <div>
+        <h2>ServiceDesk</h2>
+        <span>Pro</span>
+      </div>
+    </div>
+
+
+    <nav class="nav">
+
+      <a class="nav-item active">
+        <span class="nav-icon">▦</span>
+        Dashboard
+      </a>
+
+      <a class="nav-item">
+        <span class="nav-icon">▤</span>
+        Incidents
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+      <div class="user-card">
+
+        <div class="avatar">
+          {{ user?.name?.charAt(0) || 'A' }}
+        </div>
+
+        <div class="user-info">
+          <strong>{{ user?.name }}</strong>
+          <span>Administrator</span>
+        </div>
+
+      </div>
+
+      <button
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Sign out
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <div class="main-area">
+
+    <header class="topbar">
+
+      <div>
+        <span class="breadcrumb">
+          Admin / Dashboard
+        </span>
+      </div>
+
+      <div class="topbar-user">
+        <span class="status-dot"></span>
+        System operational
+      </div>
+
+    </header>
+
+
+    <main class="content">
+
+      <!-- PAGE HEADER -->
+
+      <section class="page-heading">
+
+        <div>
+          <h1>Incident Management</h1>
+
+          <p>
+            Monitor service requests, SLA performance and
+            support assignments.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- STATS -->
+
+      <section class="stats-grid">
+
+        <!-- TOTAL -->
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Total Incidents</span>
+            <div class="stat-icon">▤</div>
+          </div>
+
+          <strong>{{ stats().total }}</strong>
+
+          <p>All service requests</p>
+
+        </article>
+
+
+        <!-- OPEN -->
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Open</span>
+            <div class="stat-icon blue">○</div>
+          </div>
+
+          <strong>{{ stats().open }}</strong>
+
+          <p>Awaiting assignment</p>
+
+        </article>
+
+
+        <!-- ASSIGNED -->
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Assigned</span>
+            <div class="stat-icon purple">↗</div>
+          </div>
+
+          <strong>{{ stats().assigned }}</strong>
+
+          <p>Assigned to engineers</p>
+
+        </article>
+
+
+        <!-- IN PROGRESS -->
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>In Progress</span>
+            <div class="stat-icon orange">◷</div>
+          </div>
+
+          <strong>{{ stats().inProgress }}</strong>
+
+          <p>Currently being worked</p>
+
+        </article>
+
+
+        <!-- RESOLVED -->
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Resolved</span>
+            <div class="stat-icon green">✓</div>
+          </div>
+
+          <strong>{{ stats().resolved }}</strong>
+
+          <p>Successfully resolved</p>
+
+        </article>
+
+
+        <!-- SLA BREACHED -->
+
+        <article
+          class="stat-card"
+          [class.danger-card]="stats().slaBreached > 0"
+        >
+
+          <div class="stat-top">
+            <span>SLA Breached</span>
+            <div class="stat-icon red">!</div>
+          </div>
+
+          <strong>{{ stats().slaBreached }}</strong>
+
+          <p>Past SLA deadline</p>
+
+        </article>
+
+      </section>
+
+
+      <!-- MESSAGES -->
+
+      <div
+        *ngIf="successMessage()"
+        class="message success"
+      >
+        <span>✓</span>
+
+        {{ successMessage() }}
+      </div>
+
+
+      <div
+        *ngIf="errorMessage()"
+        class="message error"
+      >
+        <span>!</span>
+
+        {{ errorMessage() }}
+      </div>
+
+
+      <!-- INCIDENTS -->
+
+      <section class="incidents-card">
+
+        <div class="card-header">
+
+          <div>
+
+            <h2>All Incidents</h2>
+
+            <p>
+              Review and manage service requests across
+              the organization.
+            </p>
+
+          </div>
+
+
+          <div class="incident-total">
+            {{ incidents().length }} incidents
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+          *ngIf="loading()"
+          class="empty-state"
+        >
+
+          <div class="loader"></div>
+
+          <p>
+            Loading incidents...
+          </p>
+
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          *ngIf="!loading() && incidents().length === 0"
+          class="empty-state"
+        >
+
+          <div class="empty-icon">
+            ✓
+          </div>
+
+          <h3>
+            No incidents found
+          </h3>
+
+          <p>
+            There are currently no service requests.
+          </p>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div
+          *ngIf="!loading() && incidents().length > 0"
+          class="table-wrapper"
+        >
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Incident</th>
+                <th>Category</th>
+                <th>Created By</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Engineer</th>
+                <th>SLA Deadline</th>
+                <th>Assignment</th>
+                <th></th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr *ngFor="let incident of incidents()">
+
+                <!-- INCIDENT -->
+
+                <td>
+
+                  <div class="incident-cell">
+
+                    <span class="incident-number">
+                      #{{ incident.id }}
+                    </span>
+
+                    <strong>
+                      {{ incident.title }}
+                    </strong>
+
+                  </div>
+
+                </td>
+
+
+                <!-- CATEGORY -->
+
+                <td>
+
+                  <span class="category">
+                    {{ incident.category }}
+                  </span>
+
+                </td>
+
+
+                <!-- CREATED BY -->
+
+                <td>
+                  {{ incident.createdBy || '—' }}
+                </td>
+
+
+                <!-- PRIORITY -->
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="getPriorityClass(incident.priority)"
+                  >
+                    {{ incident.priority }}
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="badge status-badge"
+                    [ngClass]="getStatusClass(incident.status)"
+                  >
+
+                    <span class="badge-dot"></span>
+
+                    {{ incident.status }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- ENGINEER -->
+
+                <td>
+
+                  <div
+                    *ngIf="incident.assignedEngineer"
+                    class="engineer"
+                  >
+
+                    <div class="mini-avatar">
+                      {{
+                        incident.assignedEngineer.charAt(0)
+                      }}
+                    </div>
+
+                    <span>
+                      {{ incident.assignedEngineer }}
+                    </span>
+
+                  </div>
+
+
+                  <span
+                    *ngIf="!incident.assignedEngineer"
+                    class="not-assigned"
+                  >
+                    Unassigned
+                  </span>
+
+                </td>
+
+
+                <!-- SLA -->
+
+                <td>
+
+                  <div class="sla-cell">
+
+                    <span
+                      [class.sla-breached]="incident.isSlaBreached"
+                    >
+                      {{
+                        incident.slaDeadline
+                          | date:'MMM d, y'
+                      }}
+                    </span>
+
+                    <small>
+                      {{
+                        incident.slaDeadline
+                          | date:'shortTime'
+                      }}
+                    </small>
+
+
+                    <span
+                      *ngIf="incident.isSlaBreached"
+                      class="breach-label"
+                    >
+                      SLA breached
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ASSIGNMENT -->
+
+                <td>
+
+                  <!-- OPEN INCIDENT -->
+
+                  <div
+                    *ngIf="incident.status === 'Open'"
+                    class="assignment-controls"
+                  >
+
+                    <select
+                      class="engineer-select"
+                      [(ngModel)]="selectedEngineerIds[incident.id]"
+                      [disabled]="
+                        engineersLoading() ||
+                        assigningId() === incident.id
+                      "
+                    >
+
+                      <option [ngValue]="null">
+                        {{
+                          engineersLoading()
+                            ? 'Loading engineers...'
+                            : 'Select engineer'
+                        }}
+                      </option>
+
+
+                      <option
+                        *ngFor="let engineer of engineers()"
+                        [ngValue]="engineer.id"
+                      >
+                        {{ engineer.name }}
+                      </option>
+
+                    </select>
+
+
+                    <button
+                      type="button"
+                      class="assign-btn"
+                      [disabled]="
+                        !selectedEngineerIds[incident.id] ||
+                        assigningId() === incident.id
+                      "
+                      (click)="assignEngineer(incident)"
+                    >
+                      {{
+                        assigningId() === incident.id
+                          ? 'Assigning...'
+                          : 'Assign'
+                      }}
+                    </button>
+
+                  </div>
+
+
+                  <!-- ALREADY PROCESSED -->
+
+                  <span
+                    *ngIf="incident.status !== 'Open'"
+                    class="processed"
+                  >
+                    {{
+                      incident.assignedEngineer ||
+                      'Processed'
+                    }}
+                  </span>
+
+                </td>
+
+
+                <!-- VIEW -->
+
+                <td>
+
+                  <a
+                    class="view-btn"
+                    [routerLink]="[
+                      '/incidents',
+                      incident.id
+                    ]"
+                  >
+                    View →
+                  </a>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>

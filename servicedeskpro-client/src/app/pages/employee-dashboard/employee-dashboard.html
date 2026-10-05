@@ -1,0 +1,466 @@
+<div class="employee-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">SD</div>
+
+      <div>
+        <h2>ServiceDesk</h2>
+        <span>Pro</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+
+      <a class="nav-item active">
+        <span class="nav-icon">▦</span>
+        My Incidents
+      </a>
+
+      <a
+        class="nav-item"
+        (click)="showCreateForm.set(true)"
+      >
+        <span class="nav-icon">＋</span>
+        Report Issue
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="user-card">
+
+        <div class="avatar">
+          {{ user?.name?.charAt(0) || 'U' }}
+        </div>
+
+        <div class="user-info">
+          <strong>{{ user?.name }}</strong>
+          <span>Employee</span>
+        </div>
+
+      </div>
+
+      <button
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Sign out
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <span class="breadcrumb">
+        Employee / My Incidents
+      </span>
+
+      <div class="topbar-user">
+        <span class="status-dot"></span>
+        Service desk online
+      </div>
+
+    </header>
+
+
+    <main class="content">
+
+      <!-- PAGE HEADING -->
+      <section class="page-heading">
+
+        <div>
+          <h1>My Incidents</h1>
+
+          <p>
+            Report service issues and track their progress.
+          </p>
+        </div>
+
+        <button
+          class="create-btn"
+          (click)="toggleCreateForm()"
+        >
+
+          <span>
+            {{ showCreateForm() ? '×' : '+' }}
+          </span>
+
+          {{
+            showCreateForm()
+              ? 'Cancel'
+              : 'Create Incident'
+          }}
+
+        </button>
+
+      </section>
+
+
+      <!-- SUCCESS -->
+      <div
+        *ngIf="successMessage()"
+        class="message success"
+      >
+        <span>✓</span>
+        {{ successMessage() }}
+      </div>
+
+
+      <!-- ERROR -->
+      <div
+        *ngIf="errorMessage()"
+        class="message error"
+      >
+        <span>!</span>
+        {{ errorMessage() }}
+      </div>
+
+
+      <!-- CREATE INCIDENT -->
+      <section
+        *ngIf="showCreateForm()"
+        class="create-card"
+      >
+
+        <div class="create-header">
+
+          <div class="create-icon">
+            ＋
+          </div>
+
+          <div>
+            <h2>Create New Incident</h2>
+
+            <p>
+              Tell the support team what you're experiencing.
+            </p>
+          </div>
+
+        </div>
+
+
+        <form (ngSubmit)="createIncident()">
+
+          <!-- TITLE -->
+          <div class="form-group full">
+
+            <label for="incident-title">
+              Incident title
+            </label>
+
+            <input
+              id="incident-title"
+              type="text"
+              name="title"
+              [(ngModel)]="newIncident.title"
+              placeholder="e.g. Unable to access payroll portal"
+            />
+
+          </div>
+
+
+          <!-- DESCRIPTION -->
+          <div class="form-group full">
+
+            <label for="incident-description">
+              Description
+            </label>
+
+            <textarea
+              id="incident-description"
+              name="description"
+              [(ngModel)]="newIncident.description"
+              placeholder="Describe the issue and any relevant details..."
+              rows="5"
+            ></textarea>
+
+          </div>
+
+
+          <!-- CATEGORY + PRIORITY -->
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="incident-category">
+                Category
+              </label>
+
+              <select
+                id="incident-category"
+                name="category"
+                [(ngModel)]="newIncident.category"
+              >
+
+                <option
+                  *ngFor="let category of categories"
+                  [value]="category"
+                >
+                  {{ category }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="incident-priority">
+                Priority
+              </label>
+
+              <select
+                id="incident-priority"
+                name="priority"
+                [(ngModel)]="newIncident.priority"
+              >
+                <option [ngValue]="0">Low</option>
+                <option [ngValue]="1">Medium</option>
+                <option [ngValue]="2">High</option>
+                <option [ngValue]="3">Critical</option>
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="showCreateForm.set(false)"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="submit-btn"
+              [disabled]="submitting()"
+            >
+              {{
+                submitting()
+                  ? 'Creating...'
+                  : 'Create Incident'
+              }}
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+
+      <!-- INCIDENT LIST -->
+      <section class="incidents-card">
+
+        <div class="card-header">
+
+          <div>
+            <h2>Your Incidents</h2>
+
+            <p>
+              Service requests you've submitted.
+            </p>
+          </div>
+
+          <div class="incident-total">
+            {{ incidents().length }} incidents
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+        <div
+          *ngIf="loading()"
+          class="empty-state"
+        >
+          <div class="loader"></div>
+
+          <p>
+            Loading incidents...
+          </p>
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          *ngIf="!loading() && incidents().length === 0"
+          class="empty-state"
+        >
+
+          <div class="empty-icon">
+            ✓
+          </div>
+
+          <h3>No incidents yet</h3>
+
+          <p>
+            Create an incident when you need assistance.
+          </p>
+
+        </div>
+
+
+        <!-- TABLE -->
+        <div
+          *ngIf="!loading() && incidents().length > 0"
+          class="table-wrapper"
+        >
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Incident</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>SLA Deadline</th>
+                <th></th>
+              </tr>
+            </thead>
+
+
+            <tbody>
+
+              <tr *ngFor="let incident of incidents()">
+
+                <!-- INCIDENT -->
+                <td>
+
+                  <div class="incident-cell">
+
+                    <span class="incident-number">
+                      #{{ incident.id }}
+                    </span>
+
+                    <strong>
+                      {{ incident.title }}
+                    </strong>
+
+                  </div>
+
+                </td>
+
+
+                <!-- CATEGORY -->
+                <td>
+
+                  <span class="category">
+                    {{ incident.category }}
+                  </span>
+
+                </td>
+
+
+                <!-- PRIORITY -->
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="getPriorityClass(incident.priority)"
+                  >
+                    {{ incident.priority }}
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+                <td>
+
+                  <span
+                    class="badge status-badge"
+                    [ngClass]="getStatusClass(incident.status)"
+                  >
+
+                    <span class="badge-dot"></span>
+
+                    {{ incident.status }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- SLA -->
+                <td>
+
+                  <div class="sla-cell">
+
+                    <span
+                      [class.sla-breached]="incident.isSlaBreached"
+                    >
+                      {{
+                        incident.slaDeadline
+                          | date:'MMM d, y'
+                      }}
+                    </span>
+
+                    <small>
+                      {{
+                        incident.slaDeadline
+                          | date:'shortTime'
+                      }}
+                    </small>
+
+                    <span
+                      *ngIf="incident.isSlaBreached"
+                      class="breach-label"
+                    >
+                      SLA breached
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- DETAILS -->
+                <td>
+
+                  <a
+                    class="view-btn"
+                    [routerLink]="[
+                      '/incidents',
+                      incident.id
+                    ]"
+                  >
+                    View details →
+                  </a>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>

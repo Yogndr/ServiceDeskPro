@@ -1,0 +1,76 @@
+# ==========================================
+# ServiceDeskPro
+# ASP.NET Core + Angular
+# ==========================================
+
+# --------------------
+# .NET / ASP.NET Core
+# --------------------
+**/bin/
+**/obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Test / coverage
+TestResults/
+coverage/
+coverage.*
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# --------------------
+# Angular / Node
+# --------------------
+**/node_modules/
+**/dist/
+**/.angular/
+**/.cache/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --------------------
+# IDE / Editors
+# --------------------
+.vscode/
+.idea/
+
+# --------------------
+# OS files
+# --------------------
+.DS_Store
+Thumbs.db
+
+# --------------------
+# Environment / secrets
+# --------------------
+.env
+.env.*
+!.env.example
+
+appsettings.Development.json
+appsettings.Local.json
+
+# Certificates / keys
+*.pfx
+*.p12
+*.pem
+*.key
+
+# --------------------
+# Temporary files
+# --------------------
+*.tmp
+*.temp
+*.log

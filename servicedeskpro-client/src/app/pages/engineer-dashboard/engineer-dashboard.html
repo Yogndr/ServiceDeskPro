@@ -1,0 +1,442 @@
+<div class="engineer-layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">SD</div>
+
+      <div>
+        <h2>ServiceDesk</h2>
+        <span>Pro</span>
+      </div>
+    </div>
+
+
+    <nav class="nav">
+
+      <a class="nav-item active">
+        <span class="nav-icon">▦</span>
+        Work Queue
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+      <div class="user-card">
+
+        <div class="avatar">
+          {{ user?.name?.charAt(0) || 'E' }}
+        </div>
+
+        <div class="user-info">
+          <strong>{{ user?.name }}</strong>
+          <span>Support Engineer</span>
+        </div>
+
+      </div>
+
+      <button
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        Sign out
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN AREA -->
+
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+
+    <header class="topbar">
+
+      <span class="breadcrumb">
+        Engineer / Work Queue
+      </span>
+
+      <div class="topbar-user">
+        <span class="status-dot"></span>
+        Available for support
+      </div>
+
+    </header>
+
+
+    <main class="content">
+
+      <!-- PAGE HEADING -->
+
+      <section class="page-heading">
+
+        <div>
+          <span class="eyebrow">
+            SUPPORT WORKSPACE
+          </span>
+
+          <h1>Your Work Queue</h1>
+
+          <p>
+            Review assigned incidents and move them
+            through the resolution workflow.
+          </p>
+        </div>
+
+        <div class="queue-summary">
+          <strong>{{ incidents().length }}</strong>
+          <span>Assigned incidents</span>
+        </div>
+
+      </section>
+
+
+      <!-- MESSAGES -->
+
+      <div
+        *ngIf="successMessage()"
+        class="message success"
+      >
+        <span class="message-icon">✓</span>
+        {{ successMessage() }}
+      </div>
+
+
+      <div
+        *ngIf="errorMessage()"
+        class="message error"
+      >
+        <span class="message-icon">!</span>
+        {{ errorMessage() }}
+      </div>
+
+
+      <!-- WORK QUEUE -->
+
+      <section class="incidents-card">
+
+        <div class="card-header">
+
+          <div>
+            <h2>Assigned Incidents</h2>
+
+            <p>
+              Incidents currently assigned to you.
+            </p>
+          </div>
+
+          <div class="incident-total">
+            {{ incidents().length }} incidents
+          </div>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+          *ngIf="loading()"
+          class="empty-state"
+        >
+          <div class="loader"></div>
+
+          <p>
+            Loading your work queue...
+          </p>
+        </div>
+
+
+        <!-- EMPTY -->
+
+        <div
+          *ngIf="!loading() && incidents().length === 0"
+          class="empty-state"
+        >
+
+          <div class="empty-icon">
+            ✓
+          </div>
+
+          <h3>You're all caught up</h3>
+
+          <p>
+            There are no incidents currently assigned to you.
+          </p>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div
+          *ngIf="!loading() && incidents().length > 0"
+          class="table-wrapper"
+        >
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Incident</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>SLA Deadline</th>
+                <th>Workflow</th>
+                <th></th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr *ngFor="let incident of incidents()">
+
+                <!-- INCIDENT -->
+
+                <td>
+
+                  <div class="incident-cell">
+
+                    <span class="incident-number">
+                      #{{ incident.id }}
+                    </span>
+
+                    <strong>
+                      {{ incident.title }}
+                    </strong>
+
+                  </div>
+
+                </td>
+
+
+                <!-- CATEGORY -->
+
+                <td>
+                  <span class="category">
+                    {{ incident.category }}
+                  </span>
+                </td>
+
+
+                <!-- PRIORITY -->
+
+                <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="getPriorityClass(incident.priority)"
+                  >
+                    {{ incident.priority }}
+                  </span>
+
+                </td>
+
+
+                <!-- STATUS -->
+
+                <td>
+
+                  <span
+                    class="badge status-badge"
+                    [ngClass]="getStatusClass(incident.status)"
+                  >
+                    <span class="badge-dot"></span>
+
+                    {{ incident.status }}
+                  </span>
+
+                </td>
+
+
+                <!-- SLA -->
+
+                <td>
+
+                  <div class="sla-cell">
+
+                    <span
+                      [class.sla-breached]="incident.isSlaBreached"
+                    >
+                      {{
+                        incident.slaDeadline
+                          | date:'MMM d, y'
+                      }}
+                    </span>
+
+                    <small>
+                      {{
+                        incident.slaDeadline
+                          | date:'shortTime'
+                      }}
+                    </small>
+
+
+                    <span
+                      *ngIf="incident.isSlaBreached"
+                      class="breach-label"
+                    >
+                      SLA breached
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- WORKFLOW ACTION -->
+
+                <td>
+
+                  <!-- ASSIGNED -> IN PROGRESS -->
+
+                  <button
+                    *ngIf="incident.status === 'Assigned'"
+                    class="action-btn start-btn"
+                    [disabled]="updatingId() === incident.id"
+                    (click)="startWork(incident)"
+                  >
+                    {{
+                      updatingId() === incident.id
+                        ? 'Updating...'
+                        : 'Start Work'
+                    }}
+                  </button>
+
+
+                  <!-- IN PROGRESS -> RESOLVED -->
+
+                  <button
+                    *ngIf="incident.status === 'InProgress'"
+                    class="action-btn resolve-btn"
+                    [disabled]="updatingId() === incident.id"
+                    (click)="resolveIncident(incident)"
+                  >
+                    {{
+                      updatingId() === incident.id
+                        ? 'Resolving...'
+                        : 'Resolve'
+                    }}
+                  </button>
+
+
+                  <!-- RESOLVED -->
+
+                  <div
+                    *ngIf="
+                      incident.status === 'Resolved' ||
+                      incident.status === 'Closed'
+                    "
+                    class="completed"
+                  >
+                    <span>✓</span>
+                    Completed
+                  </div>
+
+                </td>
+
+
+                <!-- DETAILS -->
+
+                <td>
+
+                  <a
+                    class="view-btn"
+                    [routerLink]="[
+                      '/incidents',
+                      incident.id
+                    ]"
+                  >
+                    View details →
+                  </a>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- WORKFLOW INFO -->
+
+      <section class="workflow-card">
+
+        <div class="workflow-heading">
+
+          <div class="workflow-icon">
+            ↗
+          </div>
+
+          <div>
+            <h3>Incident workflow</h3>
+
+            <p>
+              Assigned incidents follow this support lifecycle.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="workflow-steps">
+
+          <div class="workflow-step">
+            <span class="step-number">1</span>
+
+            <div>
+              <strong>Assigned</strong>
+              <p>Incident enters your queue</p>
+            </div>
+          </div>
+
+
+          <div class="connector">→</div>
+
+
+          <div class="workflow-step">
+            <span class="step-number">2</span>
+
+            <div>
+              <strong>In Progress</strong>
+              <p>Start investigating the issue</p>
+            </div>
+          </div>
+
+
+          <div class="connector">→</div>
+
+
+          <div class="workflow-step">
+            <span class="step-number completed-number">3</span>
+
+            <div>
+              <strong>Resolved</strong>
+              <p>Issue has been resolved</p>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+</div>

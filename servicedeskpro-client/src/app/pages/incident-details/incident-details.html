@@ -1,0 +1,609 @@
+<div class="details-layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">SD</div>
+
+      <div>
+        <h2>ServiceDesk</h2>
+        <span>Pro</span>
+      </div>
+    </div>
+
+
+    <nav class="nav">
+
+      <button
+        class="nav-item active"
+        (click)="goBack()"
+      >
+        <span class="nav-icon">←</span>
+        Back to Dashboard
+      </button>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+
+      <div class="user-card">
+
+        <div class="avatar">
+          {{ user?.name?.charAt(0) || 'U' }}
+        </div>
+
+        <div class="user-info">
+          <strong>{{ user?.name }}</strong>
+
+          <span>
+            {{ user?.role }}
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN AREA -->
+
+  <div class="main-area">
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+      <span class="breadcrumb">
+        {{ user?.role }} / Incident Details
+      </span>
+
+      <div class="topbar-status">
+        <span class="status-dot"></span>
+        ServiceDesk Pro
+      </div>
+
+    </header>
+
+
+    <main class="content">
+
+      <!-- LOADING -->
+
+      <div
+        *ngIf="loading()"
+        class="state-card"
+      >
+        <div class="loader"></div>
+
+        <h3>Loading incident</h3>
+
+        <p>
+          Retrieving the latest incident information...
+        </p>
+      </div>
+
+
+      <!-- ERROR -->
+
+      <div
+        *ngIf="!loading() && errorMessage()"
+        class="state-card error-state"
+      >
+
+        <div class="error-icon">
+          !
+        </div>
+
+        <h3>Unable to load incident</h3>
+
+        <p>
+          {{ errorMessage() }}
+        </p>
+
+        <button
+          class="back-btn"
+          (click)="goBack()"
+        >
+          ← Back to Dashboard
+        </button>
+
+      </div>
+
+
+      <!-- INCIDENT -->
+
+      <ng-container
+        *ngIf="!loading() && incident() as item"
+      >
+
+        <!-- PAGE HEADER -->
+
+        <section class="page-heading">
+
+          <div>
+
+            <button
+              class="text-back"
+              (click)="goBack()"
+            >
+              ← Back to incidents
+            </button>
+
+
+            <div class="incident-label">
+              INCIDENT #{{ item.id }}
+            </div>
+
+
+            <h1>
+              {{ item.title }}
+            </h1>
+
+
+            <div class="heading-meta">
+
+              <span
+                class="badge"
+                [ngClass]="getPriorityClass(item.priority)"
+              >
+                {{ item.priority }} Priority
+              </span>
+
+
+              <span
+                class="badge status-badge"
+                [ngClass]="getStatusClass(item.status)"
+              >
+                <span class="badge-dot"></span>
+
+                {{ item.status }}
+              </span>
+
+
+              <span
+                *ngIf="item.isSlaBreached"
+                class="sla-alert"
+              >
+                ! SLA Breached
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="incident-id-card">
+
+            <span>Incident ID</span>
+
+            <strong>
+              #{{ item.id }}
+            </strong>
+
+          </div>
+
+        </section>
+
+
+        <!-- CONTENT GRID -->
+
+        <div class="details-grid">
+
+          <!-- LEFT -->
+
+          <div class="primary-column">
+
+
+            <!-- DESCRIPTION -->
+
+            <section class="detail-card">
+
+              <div class="card-heading">
+
+                <div class="heading-icon">
+                  ≡
+                </div>
+
+                <div>
+                  <h2>Description</h2>
+
+                  <p>
+                    Information provided with this incident.
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="description">
+
+                <p>
+                  {{
+                    item.description ||
+                    'No description was provided for this incident.'
+                  }}
+                </p>
+
+              </div>
+
+            </section>
+
+
+            <!-- INCIDENT INFORMATION -->
+
+            <section class="detail-card">
+
+              <div class="card-heading">
+
+                <div class="heading-icon">
+                  i
+                </div>
+
+                <div>
+                  <h2>Incident Information</h2>
+
+                  <p>
+                    Classification and ownership details.
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="info-grid">
+
+                <div class="info-item">
+
+                  <span class="info-label">
+                    Category
+                  </span>
+
+                  <strong>
+                    {{ item.category }}
+                  </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                  <span class="info-label">
+                    Priority
+                  </span>
+
+                  <span
+                    class="badge"
+                    [ngClass]="getPriorityClass(item.priority)"
+                  >
+                    {{ item.priority }}
+                  </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                  <span class="info-label">
+                    Current Status
+                  </span>
+
+                  <span
+                    class="badge status-badge"
+                    [ngClass]="getStatusClass(item.status)"
+                  >
+                    <span class="badge-dot"></span>
+
+                    {{ item.status }}
+                  </span>
+
+                </div>
+
+
+                <div class="info-item">
+
+                  <span class="info-label">
+                    Created By
+                  </span>
+
+                  <div class="person">
+
+                    <div class="person-avatar">
+                      {{
+                        item.createdBy
+                          ? item.createdBy.charAt(0)
+                          : 'U'
+                      }}
+                    </div>
+
+                    <strong>
+                      {{ item.createdBy || 'Unknown' }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                <div class="info-item">
+
+                  <span class="info-label">
+                    Assigned Engineer
+                  </span>
+
+
+                  <div
+                    *ngIf="item.assignedEngineer"
+                    class="person"
+                  >
+
+                    <div class="person-avatar engineer-avatar">
+                      {{
+                        item.assignedEngineer.charAt(0)
+                      }}
+                    </div>
+
+                    <strong>
+                      {{ item.assignedEngineer }}
+                    </strong>
+
+                  </div>
+
+
+                  <span
+                    *ngIf="!item.assignedEngineer"
+                    class="unassigned"
+                  >
+                    Not assigned
+                  </span>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <!-- RIGHT -->
+
+          <div class="secondary-column">
+
+
+            <!-- SLA CARD -->
+
+            <section
+              class="detail-card sla-card"
+              [class.breached-card]="item.isSlaBreached"
+            >
+
+              <div class="card-heading compact">
+
+                <div
+                  class="heading-icon"
+                  [class.danger-icon]="item.isSlaBreached"
+                >
+                  ◷
+                </div>
+
+                <div>
+                  <h2>SLA Tracking</h2>
+
+                  <p>
+                    Service deadline
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="sla-content">
+
+                <span class="info-label">
+                  SLA Deadline
+                </span>
+
+                <strong
+                  [class.deadline-breached]="item.isSlaBreached"
+                >
+                  {{
+                    item.slaDeadline
+                      | date:'MMM d, y'
+                  }}
+                </strong>
+
+                <span class="sla-time">
+                  {{
+                    item.slaDeadline
+                      | date:'shortTime'
+                  }}
+                </span>
+
+
+                <div
+                  *ngIf="item.isSlaBreached"
+                  class="breached-message"
+                >
+                  <span>!</span>
+
+                  This incident has exceeded its
+                  SLA deadline.
+                </div>
+
+
+                <div
+                  *ngIf="!item.isSlaBreached"
+                  class="healthy-message"
+                >
+                  <span>✓</span>
+
+                  Incident is within its SLA window.
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <!-- TIMELINE -->
+
+            <section class="detail-card">
+
+              <div class="card-heading compact">
+
+                <div class="heading-icon">
+                  ◷
+                </div>
+
+                <div>
+                  <h2>Timeline</h2>
+
+                  <p>
+                    Incident lifecycle
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="timeline">
+
+                <!-- CREATED -->
+
+                <div class="timeline-item">
+
+                  <div class="timeline-marker active"></div>
+
+                  <div>
+
+                    <strong>
+                      Incident created
+                    </strong>
+
+                    <p>
+                      {{
+                        item.createdAt
+                          | date:'medium'
+                      }}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <!-- ASSIGNED -->
+
+                <div
+                  *ngIf="item.assignedEngineer"
+                  class="timeline-item"
+                >
+
+                  <div class="timeline-marker active"></div>
+
+                  <div>
+
+                    <strong>
+                      Assigned to engineer
+                    </strong>
+
+                    <p>
+                      {{ item.assignedEngineer }}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <!-- IN PROGRESS -->
+
+                <div
+                  *ngIf="
+                    item.status === 'InProgress' ||
+                    item.status === 'Resolved' ||
+                    item.status === 'Closed'
+                  "
+                  class="timeline-item"
+                >
+
+                  <div class="timeline-marker active"></div>
+
+                  <div>
+
+                    <strong>
+                      Work started
+                    </strong>
+
+                    <p>
+                      Engineer began investigation
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <!-- RESOLVED -->
+
+                <div
+                  *ngIf="
+                    item.status === 'Resolved' ||
+                    item.status === 'Closed'
+                  "
+                  class="timeline-item"
+                >
+
+                  <div class="timeline-marker resolved"></div>
+
+                  <div>
+
+                    <strong>
+                      Incident resolved
+                    </strong>
+
+                    <p *ngIf="item.resolvedAt">
+                      {{
+                        item.resolvedAt
+                          | date:'medium'
+                      }}
+                    </p>
+
+                    <p *ngIf="!item.resolvedAt">
+                      Resolution completed
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </section>
+
+
+            <!-- BACK -->
+
+            <button
+              class="dashboard-btn"
+              (click)="goBack()"
+            >
+              ← Back to Dashboard
+            </button>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </main>
+
+  </div>
+
+</div>

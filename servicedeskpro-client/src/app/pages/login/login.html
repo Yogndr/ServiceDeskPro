@@ -1,0 +1,192 @@
+<div class="login-page">
+
+  <!-- LEFT BRAND PANEL -->
+
+  <section class="brand-panel">
+
+    <div class="brand-content">
+
+      <div class="brand-logo">
+        <span>SD</span>
+      </div>
+
+      <h1>ServiceDesk Pro</h1>
+
+      <p class="brand-description">
+        A streamlined incident management platform
+        built for modern support teams.
+      </p>
+
+      <div class="features">
+
+        <div class="feature">
+          <div class="feature-icon">✓</div>
+
+          <div>
+            <strong>Smart Incident Tracking</strong>
+            <p>
+              Track requests throughout their complete lifecycle.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="feature">
+          <div class="feature-icon">✓</div>
+
+          <div>
+            <strong>SLA Management</strong>
+            <p>
+              Monitor deadlines and identify breached incidents.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="feature">
+          <div class="feature-icon">✓</div>
+
+          <div>
+            <strong>Role-Based Workflow</strong>
+            <p>
+              Dedicated experiences for employees,
+              engineers and administrators.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="brand-footer">
+      Incident & Service Management
+    </div>
+
+  </section>
+
+
+  <!-- LOGIN PANEL -->
+
+  <section class="login-panel">
+
+    <div class="login-container">
+
+      <div class="mobile-brand">
+        <div class="brand-logo small">
+          <span>SD</span>
+        </div>
+
+        <strong>ServiceDesk Pro</strong>
+      </div>
+
+
+      <div class="login-heading">
+
+        <span class="eyebrow">
+          SERVICE DESK PORTAL
+        </span>
+
+        <h2>Welcome back</h2>
+
+        <p>
+          Sign in to access your ServiceDesk workspace.
+        </p>
+
+      </div>
+
+
+      <form (ngSubmit)="login()">
+
+        <div class="form-group">
+
+          <label for="email">
+            Email address
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="you@company.com"
+            autocomplete="email"
+            required
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <div class="password-label">
+            <label for="password">
+              Password
+            </label>
+          </div>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+
+        </div>
+
+
+        <div
+          *ngIf="errorMessage"
+          class="error-message"
+        >
+          <span>!</span>
+          {{ errorMessage }}
+        </div>
+
+
+        <button
+          type="submit"
+          class="login-btn"
+          [disabled]="loading"
+        >
+
+          <span *ngIf="!loading">
+            Sign in
+          </span>
+
+          <span *ngIf="loading">
+            Signing in...
+          </span>
+
+        </button>
+
+      </form>
+
+
+      <div class="login-footer">
+
+        <div class="divider">
+          <span></span>
+          <p>Secure access</p>
+          <span></span>
+        </div>
+
+        <div class="roles">
+
+          <span>Employee</span>
+          <span>Engineer</span>
+          <span>Administrator</span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
