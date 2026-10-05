@@ -60,6 +60,21 @@ Engineer resolves incident
 
 ## Tech Stack
 
+## Application Screenshots
+
+### Login
+![ServiceDeskPro Login](docs/screenshots/login.png)
+
+### Employee Dashboard
+![Employee Dashboard](docs/screenshots/employee-dashboard.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+
+### Engineer Dashboard
+![Engineer Dashboard](docs/screenshots/engineer-dashboard.png)
+
+
 ### Backend
 - C#
 - ASP.NET Core Web API
